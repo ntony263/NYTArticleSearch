@@ -1,4 +1,4 @@
-package Model;
+package coderschool.nytarticlesearch.Activity.Model;
 
 /**
  * Created by Acer on 10/20/2016.

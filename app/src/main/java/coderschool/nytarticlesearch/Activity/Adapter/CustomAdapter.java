@@ -1,4 +1,4 @@
-package Adapter;
+package coderschool.nytarticlesearch.Activity.Adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -10,34 +10,26 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import Model.Article;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import coderschool.nytarticlesearch.Activity.Model.Article;
 import coderschool.nytarticlesearch.R;
 
-public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.Adapter> {
+public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Article> mArticle;
     Context mContext;
 
 
-    public CustomAdapter(){
-        mArticle = new ArrayList<>();
-    }
-
-    public void setArticle (List<Article> article, Context context){
+    public CustomAdapter(List<Article> article){
         this.mArticle = article;
-        this.mContext = context;
     }
 
-    public void addArticle (List<Article> article){
-        this.mArticle.addAll(article);
-    }
+   
 
     @Override
-    public RecyclerView.Adapter onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         View articleView = LayoutInflater.from(context).inflate(R.layout.item_article, parent, false);
         ViewHolder viewHolder = new ViewHolder(articleView);
@@ -45,7 +37,12 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.Adapter> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.Adapter holder, int position) {
+    public int getItemCount() {
+        return mArticle.size();
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Article article = mArticle.get(position);
         ViewHolder viewHolder = (ViewHolder) holder;
         viewHolder.getTvArticleText().setText(article.getTextOfArticle());
@@ -53,6 +50,7 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.Adapter> {
                 .load(article.getImagePath())
                 .into(viewHolder.getIvPicture());
     }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -72,7 +70,7 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.Adapter> {
 
         public ViewHolder (View itemView){
             super(itemView);
-            ButterKnife(this, itemView)
+            ButterKnife.bind(this, itemView);
         }
     }
 }

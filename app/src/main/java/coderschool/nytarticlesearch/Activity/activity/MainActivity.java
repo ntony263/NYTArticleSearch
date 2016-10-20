@@ -1,4 +1,4 @@
-package coderschool.nytarticlesearch.Activity;
+package coderschool.nytarticlesearch.Activity.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
