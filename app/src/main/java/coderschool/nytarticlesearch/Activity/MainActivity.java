@@ -1,7 +1,9 @@
-package coderschool.nytarticlesearch;
+package coderschool.nytarticlesearch.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import coderschool.nytarticlesearch.R;
 
 public class MainActivity extends AppCompatActivity {
 

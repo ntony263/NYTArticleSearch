@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NYTArticleSearch</string>
+    <string name="test_article_texr">This is just a test</string>
 </resources>
