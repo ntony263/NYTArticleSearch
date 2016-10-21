@@ -22,8 +22,8 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     Context mContext;
 
 
-    public CustomAdapter(List<Article> article){
-        this.mArticle = article;
+    public CustomAdapter(List<Article> articles){
+        this.mArticle = articles;
     }
 
    
@@ -43,9 +43,9 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Article article = mArticle.get(position);
+        Article articles = mArticle.get(position);
         ViewHolder viewHolder = (ViewHolder) holder;
-        viewHolder.getTvArticleText().setText(article.getTextOfArticle());
+        viewHolder.getTvArticleText().setText(articles.getTextOfArticle());
         Glide.with(mContext)
                 .load(article.getImagePath())
                 .into(viewHolder.getIvPicture());
