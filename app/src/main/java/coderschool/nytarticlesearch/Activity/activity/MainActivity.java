@@ -1,18 +1,31 @@
 package coderschool.nytarticlesearch.Activity.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import coderschool.nytarticlesearch.Activity.API.ArticleApi;
 import coderschool.nytarticlesearch.Activity.Adapter.CustomAdapter;
+import coderschool.nytarticlesearch.Activity.Model.Article;
 import coderschool.nytarticlesearch.Activity.Model.SearchRequest;
+import coderschool.nytarticlesearch.Activity.Model.SearchResult;
 import coderschool.nytarticlesearch.Activity.Utils.RetrofitUtils;
 import coderschool.nytarticlesearch.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,21 +33,32 @@ public class MainActivity extends AppCompatActivity {
     private CustomAdapter mCustomAdapter;
     private ArticleApi mArticleApi;
     private StaggeredGridLayoutManager mLayoutManager;
+    private List<Article> articles;
+    private SearchView mSearchView;
     //private MenuItem miActionProgressItem, miSearch;
 
     @BindView(R.id.rvArticleList)
     RecyclerView rvArticleList;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    @BindView(R.id.pbLoading)
+    View pbLoading;
+
+    @BindView(R.id.pbLoadMore)
+    ProgressBar pbLoadMore;
+
+
+    private interface Listener {
+        void onResult(SearchResult searchResult);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_book_list);
+        setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setUpApi();
         setUpViews();
+        search();
     }
 
     private void setUpApi() {
@@ -42,101 +66,84 @@ public class MainActivity extends AppCompatActivity {
         mArticleApi = RetrofitUtils.get().create(ArticleApi.class);
     }
 
-    private void setUpViews() {
-        setSupportActionBar(toolbar);
-        mCustomAdapter = new CustomAdapter();
-        mCustomAdapter.setListener(new CustomAdapter().Listener() {
+    private void search (){
+        mSearchRequest.resetPage();
+        pbLoading.setVisibility(View.VISIBLE);
+        fetchArticles(new Listener() {
             @Override
-            public void onItemClick(Ar book) {
-                Toast.makeText(BookListActivity.this, book.getTitle(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        lvBooks.setAdapter(new SlideInBottomAnimationAdapter(mCustomAdapter));
-        lvBooks.addItemDecoration(new DividerItemDecoration(this,
-                DividerItemDecoration.VERTICAL_LIST));
-        lvBooks.setLayoutManager(mLayoutManager);
-        lvBooks.addOnScrollListener(new EndlessScrollListener(mLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                mSearchRequest.setPage(page + 1);
-                fetchMoreBooks();
+            public void onResult(SearchResult searchResult) {
+                mCustomAdapter.setArticle(searchResult.getArticles());
+                rvArticleList.scrollToPosition(0);
             }
         });
     }
 
-    private void fetchMoreBooks() {
-        miActionProgressItem.setVisible(true);
-        miSearch.setVisible(false);
-        mArticleApi.search(mSearchRequest.toQueryMay()).enqueue(new Callback<SearchResult>() {
+
+    private void searchMore (){
+        mSearchRequest.nextPage();
+        pbLoadMore.setVisibility(View.VISIBLE);
+        fetchArticles(new Listener() {
+            @Override
+            public void onResult(SearchResult searchResult) {
+                mCustomAdapter.addArticle(searchResult.getArticles());
+            }
+        });
+    }
+
+
+
+    private void fetchArticles(final Listener listener) {
+        mArticleApi.search(mSearchRequest.toQueryMap()).enqueue(new Callback<SearchResult>() {
             @Override
             public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
-                if (response.body() != null) {
-                    mCustomAdapter.addBooks(response.body().getBooks());
-                }
+                listener.onResult(response.body());
                 handleComplete();
             }
 
             @Override
             public void onFailure(Call<SearchResult> call, Throwable t) {
-                Log.e("Error", t.getMessage());
-                handleComplete();
-            }
-        });
-    }
-
-    // Executes an API call to the OpenLibrary search endpoint, parses the results
-    // Converts them into an array of book objects and adds them to the adapter
-    private void fetchBooks() {
-        miActionProgressItem.setVisible(true);
-        miSearch.setVisible(false);
-        mArticleApi.search(mSearchRequest.toQueryMay()).enqueue(new Callback<SearchResult>() {
-            @Override
-            public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
-                handleResponse(response.body());
-                handleComplete();
-            }
-
-            @Override
-            public void onFailure(Call<SearchResult> call, Throwable t) {
-                Log.e("Error", t.getMessage());
                 handleComplete();
             }
         });
     }
 
     private void handleComplete() {
-        miActionProgressItem.setVisible(false);
-        miSearch.setVisible(true);
+        pbLoading.setVisibility(View.GONE);
+        pbLoadMore.setVisibility(View.GONE);
+
     }
 
-    private void handleResponse(SearchResult searchResult) {
-        if (searchResult != null) {
-            mCustomAdapter.setBooks(searchResult.getBooks());
-        }
+    private void setUpViews() {
+        mCustomAdapter = new CustomAdapter();
+        mCustomAdapter.setListener(new CustomAdapter.Listener() {
+            @Override
+            public void onLoadMore() {
+                searchMore();
+            }
+        });
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
+        rvArticleList.setLayoutManager(mLayoutManager);
+        rvArticleList.setAdapter(mCustomAdapter);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_book_list, menu);
-        miActionProgressItem = menu.findItem(R.id.miActionProgress);
-        miSearch = menu.findItem(R.id.miSearch);
-        return true;
+        getMenuInflater().inflate(R.menu.search, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        setUpSearchView(menuItem);
+        return super.onCreateOptionsMenu(menu);
     }
 
-    private void setUpSearchView() {
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(miSearch);
-        int searchEditId = android.support.v7.appcompat.R.id.search_src_text;
-        EditText et = (EditText) searchView.findViewById(searchEditId);
-        et.setHint("Search...");
-        et.setHintTextColor(Color.parseColor("#50FFFFFF"));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+    private void setUpSearchView(MenuItem menuItem) {
+        mSearchView = (SearchView) MenuItemCompat.getActionView(menuItem);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchView.clearFocus();
-                mSearchRequest.setPage(1);
+                //setUpApi();
                 mSearchRequest.setQuery(query);
+                search();
                 return true;
             }
 
@@ -149,23 +156,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()){
+            case R.id.action_sort:
+                Toast.makeText(this, "Sort", Toast.LENGTH_SHORT).show();
+                return true;
         }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        setUpSearchView();
-        fetchBooks();
-        return super.onPrepareOptionsMenu(menu);
     }
 }

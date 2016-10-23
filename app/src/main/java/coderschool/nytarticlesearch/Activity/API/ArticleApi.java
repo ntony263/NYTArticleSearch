@@ -8,7 +8,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.QueryMap;
 
-public class ArticleApi {
+public interface ArticleApi {
     @GET("articlesearch.json")
-    Call<SearchResult> search(@QueryMap(encoded = true) Map<String, String> option);
+    Call<SearchResult> search(@QueryMap(encoded = true) Map<String, String> options);
 }

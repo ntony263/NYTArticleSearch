@@ -1,5 +1,8 @@
 package coderschool.nytarticlesearch.Activity.Utils;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -21,6 +24,7 @@ public class RetrofitUtils {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final Gson GSON  = new Gson();
 
+    @NonNull
     public static Retrofit get() {
         return new Retrofit.Builder()
                 .baseUrl(Constant.BASE_URL)
@@ -44,13 +48,15 @@ public class RetrofitUtils {
                 Response response = chain.proceed(request);
                 ResponseBody body = response.body();
                 ApiResponse apiResponse = GSON.fromJson(body.string(), ApiResponse.class);
+                Log.d("Request=", request.toString());
+                Log.d("Reponse=", apiResponse.getStatus()+"------"+apiResponse.getResponse());
                 body.close();
                 return response.newBuilder()
                         .body(ResponseBody.create(JSON, apiResponse.getResponse().toString()))
                         .build();
 
             }
-        }
+        };
     }
 
 

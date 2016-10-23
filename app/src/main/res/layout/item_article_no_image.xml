@@ -9,18 +9,6 @@
     android:layout_margin="4dp"
     app:cardElevation="4dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <ImageView
-            tools:src="@drawable/federer"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:id="@+id/imPicture"/>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,5 +16,5 @@
             tools:text="@string/test_article_texr"
             android:id="@+id/tvArticleText"/>
 
-    </LinearLayout>
+
 </android.support.v7.widget.CardView>
