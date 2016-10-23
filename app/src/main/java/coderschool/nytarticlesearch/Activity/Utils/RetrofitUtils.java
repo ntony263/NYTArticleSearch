@@ -48,8 +48,7 @@ public class RetrofitUtils {
                 Response response = chain.proceed(request);
                 ResponseBody body = response.body();
                 ApiResponse apiResponse = GSON.fromJson(body.string(), ApiResponse.class);
-                Log.d("Request=", request.toString());
-                Log.d("Reponse=", apiResponse.getStatus()+"------"+apiResponse.getResponse());
+                Log.d("Retrofit debug", request.toString());
                 body.close();
                 return response.newBuilder()
                         .body(ResponseBody.create(JSON, apiResponse.getResponse().toString()))

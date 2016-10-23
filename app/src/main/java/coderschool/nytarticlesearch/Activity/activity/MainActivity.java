@@ -1,17 +1,27 @@
 package coderschool.nytarticlesearch.Activity.activity;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -35,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private StaggeredGridLayoutManager mLayoutManager;
     private List<Article> articles;
     private SearchView mSearchView;
+    private TextView tvDatePicker;
     //private MenuItem miActionProgressItem, miSearch;
 
     @BindView(R.id.rvArticleList)
@@ -72,8 +83,11 @@ public class MainActivity extends AppCompatActivity {
         fetchArticles(new Listener() {
             @Override
             public void onResult(SearchResult searchResult) {
-                mCustomAdapter.setArticle(searchResult.getArticles());
-                rvArticleList.scrollToPosition(0);
+                if (searchResult !=null) {
+                    mCustomAdapter.setArticle(searchResult.getArticles());
+                    rvArticleList.scrollToPosition(0);
+                    //Log.d("Main activity Debug", String.valueOf(searchResult.getArticles().get(0).getTextOfArticle()));
+                }
             }
         });
     }
@@ -85,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
         fetchArticles(new Listener() {
             @Override
             public void onResult(SearchResult searchResult) {
-                mCustomAdapter.addArticle(searchResult.getArticles());
+                if (searchResult!=null) {
+                    mCustomAdapter.addArticle(searchResult.getArticles());
+                }
             }
         });
     }
@@ -158,9 +174,63 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_sort:
-                Toast.makeText(this, "Sort", Toast.LENGTH_SHORT).show();
+                DialogFragment mDialogFragment = new ShowSearchDialogFragment();
+                FragmentManager fm = getSupportFragmentManager();
+                mDialogFragment.show(fm, "Search");
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    public static class ShowSearchDialogFragment extends DialogFragment {
+        private View mView;
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            mView = inflater.inflate(R.layout.item_advance_search, container, false);
+            TextView tvDataPicker;
+            CheckBox cbArt;
+            CheckBox cbFS;
+            CheckBox cbSport;
+            ToggleButton tbSort;
+
+            tvDataPicker = (TextView) mView.findViewById(R.id.tvDataPicker);
+            cbArt = (CheckBox) mView.findViewById(R.id.cbArt);
+            cbFS = (CheckBox) mView.findViewById(R.id.cbFS);
+            cbSport = (CheckBox) mView.findViewById(R.id.cbSport);
+            tbSort = (ToggleButton) mView.findViewById(R.id.tbSort);
+
+            return mView;
+        }
+    }
+
+    class SelectDateFragment extends DialogFragment implements
+            DatePickerDialog.OnDateSetListener {
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            final Calendar c = Calendar.getInstance();
+            int mYear = c.get(Calendar.YEAR);
+            int mMonth = c.get(Calendar.MONTH);
+            int mDay = c.get(Calendar.DAY_OF_MONTH);
+
+            return new DatePickerDialog(getActivity(), this, mYear, mMonth,
+                    mDay);//it will return dialog setting date with mYear,MMonth and MDay
+
+        }
+        @Override
+        public void onDateSet(android.widget.DatePicker view, int year,
+                              int monthOfYear, int dayOfMonth) {
+            System.out.println("year=" + year + "day=" + dayOfMonth + "month="
+                    + monthOfYear);
+            String yearString = Integer.toString(year);
+            String monthString = Integer.toString(monthOfYear+1);
+            String dayString = Integer.toString(dayOfMonth);
+            String newText = dayString+"/"+monthString+"/"+ yearString;
+            tvDatePicker = (TextView)findViewById(R.id.tvDataPicker);
+            tvDatePicker.setText(newText);
+        }
+    }
+
+
 }

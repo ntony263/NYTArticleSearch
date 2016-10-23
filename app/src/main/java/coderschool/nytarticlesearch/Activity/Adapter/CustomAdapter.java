@@ -37,7 +37,7 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public void setArticle(List<Article> articles) {
         mArticle.clear();
-        this.mArticle.addAll(articles);
+        mArticle.addAll(articles);
         notifyDataSetChanged();
     }
 

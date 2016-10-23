@@ -13,7 +13,7 @@ public class SearchRequest implements Parcelable{
     private String order = "newest";
     private boolean hasArts;
     private boolean hasFashionStyle;
-    private boolean hasSports;
+    private boolean hasSports=true;
 
     public SearchRequest (){
 
@@ -97,7 +97,7 @@ public class SearchRequest implements Parcelable{
         if (query!=null) options.put("q", query);
         if (beginDate!=null) options.put("begin_date", beginDate);
         if (order!= null) options.put("order",order.toLowerCase());
-        if (getNewDesk() != null) options.put("fq", "news_date:("+getNewDesk()+")");
+        if (getNewDesk() != null) options.put("fq", "news_desk:("+getNewDesk()+")");
         options.put("page", String.valueOf(page));
         return options;
     }
