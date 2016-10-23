@@ -23,7 +23,7 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="20sp"
+            android:layout_height="40sp"
             android:padding="2sp"
             tools:text="@string/test_article_texr"
             android:id="@+id/tvArticleText"/>

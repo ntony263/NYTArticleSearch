@@ -4,14 +4,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-
+    
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvDataPicker"
-        android:onClick="toSelectDate"
+        android:textSize="20sp"
         tools:text="2016/10/23"/>
 
     <CheckBox
@@ -41,5 +40,23 @@
         android:textOff="oldest"
         android:textOn="newest"
         />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSetSearch"
+            android:text="@string/set_search"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnCancelSearch"
+            android:text="Cancel"/>
+
+
+    </LinearLayout>
 
 </LinearLayout>

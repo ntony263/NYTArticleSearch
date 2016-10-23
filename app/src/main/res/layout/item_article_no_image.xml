@@ -11,7 +11,8 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="240dp"
+            android:textSize="20sp"
             android:padding="2dp"
             tools:text="@string/test_article_texr"
             android:id="@+id/tvArticleText"/>

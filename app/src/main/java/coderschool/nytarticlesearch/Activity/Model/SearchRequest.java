@@ -13,7 +13,7 @@ public class SearchRequest implements Parcelable{
     private String order = "newest";
     private boolean hasArts;
     private boolean hasFashionStyle;
-    private boolean hasSports=true;
+    private boolean hasSports;
 
     public SearchRequest (){
 

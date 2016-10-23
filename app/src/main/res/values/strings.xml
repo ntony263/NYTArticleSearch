@@ -3,4 +3,5 @@
     <string name="test_article_texr">Roger Federer is a Swiss professional tennis player who is currently ranked world No. 8 by the Association of Tennis Professionals</string>
     <string name="search_title">search</string>
     <string name="search_sort">sort</string>
+    <string name="set_search">Set</string>
 </resources>

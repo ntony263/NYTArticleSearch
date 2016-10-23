@@ -2,6 +2,7 @@ package coderschool.nytarticlesearch.Activity.activity;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -16,10 +17,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Calendar;
 import java.util.List;
@@ -37,6 +45,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
+import static coderschool.nytarticlesearch.R.id.btnCancelSearch;
+import static coderschool.nytarticlesearch.R.id.btnSetSearch;
+
 public class MainActivity extends AppCompatActivity {
 
     private SearchRequest mSearchRequest;
@@ -45,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private StaggeredGridLayoutManager mLayoutManager;
     private List<Article> articles;
     private SearchView mSearchView;
-    private TextView tvDatePicker;
+    private String datePickerResult;
+
     //private MenuItem miActionProgressItem, miSearch;
 
     @BindView(R.id.rvArticleList)
@@ -56,6 +69,47 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.pbLoadMore)
     ProgressBar pbLoadMore;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
 
 
     private interface Listener {
@@ -70,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
         setUpApi();
         setUpViews();
         search();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private void setUpApi() {
@@ -77,13 +134,13 @@ public class MainActivity extends AppCompatActivity {
         mArticleApi = RetrofitUtils.get().create(ArticleApi.class);
     }
 
-    private void search (){
+    private void search() {
         mSearchRequest.resetPage();
         pbLoading.setVisibility(View.VISIBLE);
         fetchArticles(new Listener() {
             @Override
             public void onResult(SearchResult searchResult) {
-                if (searchResult !=null) {
+                if (searchResult != null) {
                     mCustomAdapter.setArticle(searchResult.getArticles());
                     rvArticleList.scrollToPosition(0);
                     //Log.d("Main activity Debug", String.valueOf(searchResult.getArticles().get(0).getTextOfArticle()));
@@ -93,19 +150,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void searchMore (){
+    private void searchMore() {
         mSearchRequest.nextPage();
         pbLoadMore.setVisibility(View.VISIBLE);
         fetchArticles(new Listener() {
             @Override
             public void onResult(SearchResult searchResult) {
-                if (searchResult!=null) {
+                if (searchResult != null) {
                     mCustomAdapter.addArticle(searchResult.getArticles());
                 }
             }
         });
     }
-
 
 
     private void fetchArticles(final Listener listener) {
@@ -172,9 +228,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_sort:
-                DialogFragment mDialogFragment = new ShowSearchDialogFragment();
+                DialogFragment mDialogFragment = new ShowSearchDialogFragment();;
                 FragmentManager fm = getSupportFragmentManager();
                 mDialogFragment.show(fm, "Search");
                 return true;
@@ -183,17 +239,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static class ShowSearchDialogFragment extends DialogFragment {
+    public static class ShowSearchDialogFragment extends DialogFragment{
         private View mView;
+        private TextView tvDataPicker;
+
+        public interface EditDateDialogListener {
+            void onFinishEditDialog(String inputText);
+        }
+
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             mView = inflater.inflate(R.layout.item_advance_search, container, false);
-            TextView tvDataPicker;
-            CheckBox cbArt;
+            final CheckBox cbArt;
             CheckBox cbFS;
             CheckBox cbSport;
             ToggleButton tbSort;
+
 
             tvDataPicker = (TextView) mView.findViewById(R.id.tvDataPicker);
             cbArt = (CheckBox) mView.findViewById(R.id.cbArt);
@@ -201,12 +263,36 @@ public class MainActivity extends AppCompatActivity {
             cbSport = (CheckBox) mView.findViewById(R.id.cbSport);
             tbSort = (ToggleButton) mView.findViewById(R.id.tbSort);
 
+
+            final Calendar c = Calendar.getInstance();
+            String mYear = String.valueOf(c.get(Calendar.YEAR));
+            String mMonth = String.valueOf(c.get(Calendar.MONTH)+1);
+            String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+
+            tvDataPicker.setText(mDay+"/"+mMonth+"/"+mYear);
+            tvDataPicker.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DialogFragment newFragment;
+                    newFragment= new SelectDateFragment(tvDataPicker);
+                    newFragment.show(getFragmentManager(), "datePicker");
+                }
+            });
+
+
             return mView;
         }
     }
 
-    class SelectDateFragment extends DialogFragment implements
+    public static class SelectDateFragment extends DialogFragment implements
             DatePickerDialog.OnDateSetListener {
+
+        public SelectDateFragment(TextView textView) {
+            mTextView = textView;
+        }
+
+        private String newDate;
+        private TextView mTextView;
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
             final Calendar c = Calendar.getInstance();
@@ -218,17 +304,17 @@ public class MainActivity extends AppCompatActivity {
                     mDay);//it will return dialog setting date with mYear,MMonth and MDay
 
         }
+
         @Override
-        public void onDateSet(android.widget.DatePicker view, int year,
+        public void onDateSet(DatePicker view, int year,
                               int monthOfYear, int dayOfMonth) {
             System.out.println("year=" + year + "day=" + dayOfMonth + "month="
                     + monthOfYear);
             String yearString = Integer.toString(year);
-            String monthString = Integer.toString(monthOfYear+1);
+            String monthString = Integer.toString(monthOfYear + 1);
             String dayString = Integer.toString(dayOfMonth);
-            String newText = dayString+"/"+monthString+"/"+ yearString;
-            tvDatePicker = (TextView)findViewById(R.id.tvDataPicker);
-            tvDatePicker.setText(newText);
+            newDate = dayString + "/" + monthString + "/" + yearString;
+            mTextView.setText(newDate);
         }
     }
 
