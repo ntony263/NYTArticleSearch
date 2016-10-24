@@ -24,7 +24,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -49,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     private List<Article> articles;
     private SearchView mSearchView;
     private String datePickerResult;
+    private boolean setIsArt;
+    private boolean setIsFS;
+    private boolean setIsSport;
+    private String setIsNewest;
 
     //private MenuItem miActionProgressItem, miSearch;
 
@@ -162,6 +171,23 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 //setUpApi();
                 mSearchRequest.setQuery(query);
+                if (datePickerResult != null) {
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                    Date startDate;
+                    try {
+                        startDate = df.parse(datePickerResult);
+                        df = new SimpleDateFormat("yyyyMMdd");
+                        String newDateString = df.format(startDate);
+                        Log.d("New date", newDateString);
+                        mSearchRequest.setBeginDate(newDateString);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                mSearchRequest.setHasArts(setIsArt);
+                mSearchRequest.setHasFashionStyle(setIsFS);
+                mSearchRequest.setHasSports(setIsSport);
+                mSearchRequest.setOrder(setIsNewest);
                 search();
                 return true;
             }
@@ -177,9 +203,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort:
-                DialogFragment mDialogFragment = new ShowSearchDialogFragment();;
+                final ShowSearchDialogFragment mDialogFragment = new ShowSearchDialogFragment();
                 FragmentManager fm = getSupportFragmentManager();
                 mDialogFragment.show(fm, "Search");
+                mDialogFragment.resultDialogListener(new ShowSearchDialogFragment.EditDateDialogListener() {
+                    @Override
+                    public void onFinishEditDialog (String pickDate,
+                                                    boolean isArt,
+                                                    boolean isFS,
+                                                    boolean isSport,
+                                                    String isNewest) {
+                        datePickerResult = pickDate;
+                        setIsArt = isArt;
+                        setIsFS = isFS;
+                        setIsSport=isSport;
+                        setIsNewest= isNewest;
+                    }
+                });
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -189,19 +229,35 @@ public class MainActivity extends AppCompatActivity {
     public static class ShowSearchDialogFragment extends DialogFragment{
         private View mView;
         private TextView tvDataPicker;
+        private String currentDate;
+        private EditDateDialogListener mEditDateDialogListener;
+        private List<String> settingList;
+
+        public String getCurrentDate() {
+            return currentDate;
+        }
 
         public interface EditDateDialogListener {
-            void onFinishEditDialog(String sendResult);
+            void onFinishEditDialog (String pickDate,
+                                     boolean isArt,
+                                     boolean isFS,
+                                     boolean isSport,
+                                     String isNewest);
         }
+
+        public void resultDialogListener (EditDateDialogListener listener){
+            this.mEditDateDialogListener = listener;
+        }
+
 
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             mView = inflater.inflate(R.layout.item_advance_search, container, false);
             final CheckBox cbArt;
-            CheckBox cbFS;
-            CheckBox cbSport;
-            ToggleButton tbSort;
+            final CheckBox cbFS;
+            final CheckBox cbSport;
+            final ToggleButton tbSort;
             Button btnSetSearch;
             Button btnCancelSearch;
 
@@ -232,9 +288,11 @@ public class MainActivity extends AppCompatActivity {
             btnSetSearch.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Log.d("Activity", String.valueOf(getActivity()));
-                    //EditDateDialogListener listener =  getActivity();
-                    //listener.onFinishEditDialog("Result String !!!!");
+                    mEditDateDialogListener.onFinishEditDialog(tvDataPicker.getText().toString(),
+                            cbArt.isChecked(),
+                            cbFS.isChecked(),
+                            cbSport.isChecked(),
+                            tbSort.isChecked()?"newest":"oldest");
                     dismiss();
                 }
             });
