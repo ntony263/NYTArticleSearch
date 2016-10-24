@@ -95,9 +95,9 @@ public class SearchRequest implements Parcelable{
     public Map<String, String> toQueryMap (){
         Map<String, String> options = new HashMap<>();
         if (query!=null) options.put("q", query);
-        if (beginDate!=null) options.put("begin_date", beginDate);
+        if (beginDate!=null) options.put("begindate", beginDate);
         if (order!= null) options.put("order",order.toLowerCase());
-        if (getNewDesk() != null) options.put("fq", "news_desk:("+getNewDesk()+")");
+        if (getNewDesk() != null) options.put("fq", "news_desk("+getNewDesk()+")");
         options.put("page", String.valueOf(page));
         return options;
     }
