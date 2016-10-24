@@ -4,4 +4,8 @@
     <string name="search_title">search</string>
     <string name="search_sort">sort</string>
     <string name="set_search">Set</string>
+    <string name="fashion_and_style">Fashion and Style</string>
+    <string name="item_sport">Sport</string>
+    <string name="item_oldest">oldest</string>
+    <string name="item_newest">newest</string>
 </resources>

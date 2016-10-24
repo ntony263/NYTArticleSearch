@@ -259,7 +259,6 @@ public class MainActivity extends AppCompatActivity {
             final CheckBox cbSport;
             final ToggleButton tbSort;
             Button btnSetSearch;
-            Button btnCancelSearch;
 
 
             tvDataPicker = (TextView) mView.findViewById(R.id.tvDataPicker);
@@ -268,7 +267,6 @@ public class MainActivity extends AppCompatActivity {
             cbSport = (CheckBox) mView.findViewById(R.id.cbSport);
             tbSort = (ToggleButton) mView.findViewById(R.id.tbSort);
             btnSetSearch = (Button) mView.findViewById(R.id.btnSetSearch);
-            btnCancelSearch = (Button) mView.findViewById(R.id.btnCancelSearch);
 
             final Calendar c = Calendar.getInstance();
             String mYear = String.valueOf(c.get(Calendar.YEAR));

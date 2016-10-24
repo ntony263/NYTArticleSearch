@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="200dp"
+    android:layout_height="100sp">
     
 
     <TextView
@@ -23,22 +23,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/cbFS"
-        android:text="Fashion and Style"
+        android:text="@string/fashion_and_style"
         />
 
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/cbSport"
-        android:text="Sport"
+        android:text="@string/item_sport"
         />
 
     <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tbSort"
-        android:textOff="oldest"
-        android:textOn="newest"
+        android:textOff="@string/item_oldest"
+        android:textOn="@string/item_newest"
         />
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,11 +50,6 @@
             android:id="@+id/btnSetSearch"
             android:text="@string/set_search"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnCancelSearch"
-            android:text="Cancel"/>
 
 
     </LinearLayout>
