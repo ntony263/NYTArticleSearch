@@ -40,6 +40,7 @@ import coderschool.nytarticlesearch.Activity.Model.Article;
 import coderschool.nytarticlesearch.Activity.Model.SearchRequest;
 import coderschool.nytarticlesearch.Activity.Model.SearchResult;
 import coderschool.nytarticlesearch.Activity.Utils.RetrofitUtils;
+import coderschool.nytarticlesearch.Activity.Utils.ShowSearchDialogFragment;
 import coderschool.nytarticlesearch.R;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean setIsSport;
     private String setIsNewest;
 
-    //private MenuItem miActionProgressItem, miSearch;
 
     @BindView(R.id.rvArticleList)
     RecyclerView rvArticleList;
@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         setUpApi();
         setUpViews();
         search();
-
     }
 
     private void setUpApi() {
@@ -99,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                 if (searchResult != null) {
                     mCustomAdapter.setArticle(searchResult.getArticles());
                     rvArticleList.scrollToPosition(0);
-                    //Log.d("Main activity Debug", String.valueOf(searchResult.getArticles().get(0).getTextOfArticle()));
                 }
             }
         });
@@ -169,25 +167,8 @@ public class MainActivity extends AppCompatActivity {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //setUpApi();
                 mSearchRequest.setQuery(query);
-                if (datePickerResult != null) {
-                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-                    Date startDate;
-                    try {
-                        startDate = df.parse(datePickerResult);
-                        df = new SimpleDateFormat("yyyyMMdd");
-                        String newDateString = df.format(startDate);
-                        Log.d("New date", newDateString);
-                        mSearchRequest.setBeginDate(newDateString);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-                mSearchRequest.setHasArts(setIsArt);
-                mSearchRequest.setHasFashionStyle(setIsFS);
-                mSearchRequest.setHasSports(setIsSport);
-                mSearchRequest.setOrder(setIsNewest);
+                submitSetting();
                 search();
                 return true;
             }
@@ -199,11 +180,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void submitSetting() {
+        if (datePickerResult != null) {
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            Date startDate;
+            try {
+                startDate = df.parse(datePickerResult);
+                df = new SimpleDateFormat("yyyyMMdd");
+                String newDateString = df.format(startDate);
+                Log.d("New date", newDateString);
+                mSearchRequest.setBeginDate(newDateString);
+            }
+            catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        mSearchRequest.setHasArts(setIsArt);
+        mSearchRequest.setHasFashionStyle(setIsFS);
+        mSearchRequest.setHasSports(setIsSport);
+        mSearchRequest.setOrder(setIsNewest);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort:
-                final ShowSearchDialogFragment mDialogFragment = new ShowSearchDialogFragment();
+                ShowSearchDialogFragment mDialogFragment = new ShowSearchDialogFragment();
                 FragmentManager fm = getSupportFragmentManager();
                 mDialogFragment.show(fm, "Search");
                 mDialogFragment.resultDialogListener(new ShowSearchDialogFragment.EditDateDialogListener() {
@@ -224,115 +226,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
-    public static class ShowSearchDialogFragment extends DialogFragment{
-        private View mView;
-        private TextView tvDataPicker;
-        private String currentDate;
-        private EditDateDialogListener mEditDateDialogListener;
-        private List<String> settingList;
-
-        public String getCurrentDate() {
-            return currentDate;
-        }
-
-        public interface EditDateDialogListener {
-            void onFinishEditDialog (String pickDate,
-                                     boolean isArt,
-                                     boolean isFS,
-                                     boolean isSport,
-                                     String isNewest);
-        }
-
-        public void resultDialogListener (EditDateDialogListener listener){
-            this.mEditDateDialogListener = listener;
-        }
-
-
-        @Nullable
-        @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            mView = inflater.inflate(R.layout.item_advance_search, container, false);
-            final CheckBox cbArt;
-            final CheckBox cbFS;
-            final CheckBox cbSport;
-            final ToggleButton tbSort;
-            Button btnSetSearch;
-
-
-            tvDataPicker = (TextView) mView.findViewById(R.id.tvDataPicker);
-            cbArt = (CheckBox) mView.findViewById(R.id.cbArt);
-            cbFS = (CheckBox) mView.findViewById(R.id.cbFS);
-            cbSport = (CheckBox) mView.findViewById(R.id.cbSport);
-            tbSort = (ToggleButton) mView.findViewById(R.id.tbSort);
-            btnSetSearch = (Button) mView.findViewById(R.id.btnSetSearch);
-
-            final Calendar c = Calendar.getInstance();
-            String mYear = String.valueOf(c.get(Calendar.YEAR));
-            String mMonth = String.valueOf(c.get(Calendar.MONTH)+1);
-            String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
-
-            tvDataPicker.setText(mDay+"/"+mMonth+"/"+mYear);
-            tvDataPicker.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    DialogFragment newFragment;
-                    newFragment= new SelectDateFragment(tvDataPicker);
-                    newFragment.show(getFragmentManager(), "datePicker");
-                }
-            });
-
-            btnSetSearch.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mEditDateDialogListener.onFinishEditDialog(tvDataPicker.getText().toString(),
-                            cbArt.isChecked(),
-                            cbFS.isChecked(),
-                            cbSport.isChecked(),
-                            tbSort.isChecked()?"newest":"oldest");
-                    dismiss();
-                }
-            });
-
-
-            return mView;
-        }
-    }
-
-    public static class SelectDateFragment extends DialogFragment implements
-            DatePickerDialog.OnDateSetListener {
-
-        public SelectDateFragment(TextView textView) {
-            mTextView = textView;
-        }
-
-        private String newDate;
-        private TextView mTextView;
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-
-            final Calendar c = Calendar.getInstance();
-            int mYear = c.get(Calendar.YEAR);
-            int mMonth = c.get(Calendar.MONTH);
-            int mDay = c.get(Calendar.DAY_OF_MONTH);
-
-            return new DatePickerDialog(getActivity(), this, mYear, mMonth,
-                    mDay);//it will return dialog setting date with mYear,MMonth and MDay
-
-        }
-
-        @Override
-        public void onDateSet(DatePicker view, int year,
-                              int monthOfYear, int dayOfMonth) {
-            System.out.println("year=" + year + "day=" + dayOfMonth + "month="
-                    + monthOfYear);
-            String yearString = Integer.toString(year);
-            String monthString = Integer.toString(monthOfYear + 1);
-            String dayString = Integer.toString(dayOfMonth);
-            newDate = dayString + "/" + monthString + "/" + yearString;
-            mTextView.setText(newDate);
-        }
-    }
-
-
 }
