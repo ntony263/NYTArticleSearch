@@ -2,7 +2,6 @@ package coderschool.nytarticlesearch.Activity.activity;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -12,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,11 +23,6 @@ import android.widget.DatePicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Calendar;
 import java.util.List;
@@ -44,10 +39,6 @@ import coderschool.nytarticlesearch.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
-import static coderschool.nytarticlesearch.R.id.btnCancelSearch;
-import static coderschool.nytarticlesearch.R.id.btnSetSearch;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,48 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.pbLoadMore)
     ProgressBar pbLoadMore;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
-    }
-
 
     private interface Listener {
         void onResult(SearchResult searchResult);
@@ -124,9 +73,7 @@ public class MainActivity extends AppCompatActivity {
         setUpApi();
         setUpViews();
         search();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
     private void setUpApi() {
@@ -244,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         private TextView tvDataPicker;
 
         public interface EditDateDialogListener {
-            void onFinishEditDialog(String inputText);
+            void onFinishEditDialog(String sendResult);
         }
 
         @Nullable
@@ -255,6 +202,8 @@ public class MainActivity extends AppCompatActivity {
             CheckBox cbFS;
             CheckBox cbSport;
             ToggleButton tbSort;
+            Button btnSetSearch;
+            Button btnCancelSearch;
 
 
             tvDataPicker = (TextView) mView.findViewById(R.id.tvDataPicker);
@@ -262,7 +211,8 @@ public class MainActivity extends AppCompatActivity {
             cbFS = (CheckBox) mView.findViewById(R.id.cbFS);
             cbSport = (CheckBox) mView.findViewById(R.id.cbSport);
             tbSort = (ToggleButton) mView.findViewById(R.id.tbSort);
-
+            btnSetSearch = (Button) mView.findViewById(R.id.btnSetSearch);
+            btnCancelSearch = (Button) mView.findViewById(R.id.btnCancelSearch);
 
             final Calendar c = Calendar.getInstance();
             String mYear = String.valueOf(c.get(Calendar.YEAR));
@@ -276,6 +226,16 @@ public class MainActivity extends AppCompatActivity {
                     DialogFragment newFragment;
                     newFragment= new SelectDateFragment(tvDataPicker);
                     newFragment.show(getFragmentManager(), "datePicker");
+                }
+            });
+
+            btnSetSearch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Log.d("Activity", String.valueOf(getActivity()));
+                    //EditDateDialogListener listener =  getActivity();
+                    //listener.onFinishEditDialog("Result String !!!!");
+                    dismiss();
                 }
             });
 
